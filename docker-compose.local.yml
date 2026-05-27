@@ -19,18 +19,14 @@ services:
       - social-network
 
   social-backend:
-    image: jhonsegurag/social-backend:latest
+    build: ./social-backend
     restart: unless-stopped
     ports:
       - "3000:3000"
+    env_file:
+      - ./social-backend/.env
     environment:
-      PORT: 3000
       MYSQL_HOST: mysql
-      MYSQL_USER: ${MYSQL_USER:-root}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-root}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-social-backend}
-      MYSQL_PORT: 3306
-      JWT_SECRET: ${JWT_SECRET:-Secret_Key1-2-3.}
     volumes:
       - backend_uploads:/app/uploads
     depends_on:
@@ -40,7 +36,12 @@ services:
       - social-network
 
   social-frontend:
-    image: jhonsegurag/social-frontend:latest
+    build:
+      context: ./social-frontend
+      args:
+        # development config uses http://localhost:3000/api/ (local backend)
+        # production config uses the Render-deployed backend URL
+        BUILD_CONFIG: development
     restart: unless-stopped
     ports:
       - "8080:8080"
